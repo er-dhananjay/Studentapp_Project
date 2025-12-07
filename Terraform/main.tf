@@ -26,7 +26,7 @@ resource "aws_db_instance" "student_db" {
     instance_class = var.studentapp_db_instance_class 
     allocated_storage = var.studentapp_db_allocated_storage
     engine = "MariaDB"
-    engine = "MariaDB 11.4.8"
+    engine_version = "MariaDB 11.4.8"
 }
 
 output "studentapp_publicip" {
