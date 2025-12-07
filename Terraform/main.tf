@@ -5,6 +5,20 @@ resource "aws_instance" "studentapp" {
   vpc_security_group_ids      = [var.studentapp_instance_vpc_security_group_ids]
   disable_api_termination     = var.studentapp_disable_api_termination
 
+resource "aws_db_instance" "student_db" {
+  identifier              = "studentapp"
+  db_name                 = var.studentapp_db_db_name
+  username                = var.studentapp_db_username
+  password                = var.studentapp_db_password
+  instance_class          = var.studentapp_db_instance_class
+  allocated_storage       = var.studentapp_db_allocated_storage
+  engine                  = "MariaDB"
+  engine_version          = "11.4.8"
+  skip_final_snapshot     = true
+  vpc_security_group_ids  = [var.studentapp_instance_vpc_security_group_ids]
+}
+
+
   user_data = <<-EOT
 #!/bin/bash
 sudo apt update -y
