@@ -15,7 +15,22 @@ resource "aws_instance" "studentapp" {
     sh dockerinstall.sh
     
     docker compose up -d
-  EOT
+    mysql -h ${aws-db_instance.studentapp_db.address} -u admin -p${var.studentapp_db_password}
+    
+    create database  studentapp;
+    use studentapp;
+     CREATE TABLE if not exists students(student_id INT NOT NULL AUTO_INCREMENT,  
+	 student_name VARCHAR(100) NOT NULL,  
+	 student_addr VARCHAR(100) NOT NULL,   
+	 student_age VARCHAR(3) NOT NULL,      
+	 student_qual VARCHAR(20) NOT NULL,     
+	 student_percent VARCHAR(10) NOT NULL,   
+	 student_year_passed VARCHAR(10) NOT NULL,  
+	 PRIMARY KEY (student_id)  
+     ); 
+     show tables;
+     exit
+     EOT
 }
 
 resource "aws_db_instance" "student_db" {
@@ -27,6 +42,8 @@ resource "aws_db_instance" "student_db" {
     allocated_storage = var.studentapp_db_allocated_storage
     engine = "MariaDB"
     engine_version = "11.4.8"
+    skip_final_snapshot = true
+    vpc_security_group_ids = [var.studentapp_instance_vpc_security_group_ids]
 }
 
 output "studentapp_publicip" {
