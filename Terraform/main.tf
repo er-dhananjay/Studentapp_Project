@@ -10,7 +10,7 @@ resource "aws_instance" "studentapp" {
     sudo apt update -y
     
     git clone https://github.com/er-dhananjay/Studentapp_Project.git
-    
+    cd Studentapp_Project/    
     chmod 700 dockerinstall.sh
     sh dockerinstall.sh
     
