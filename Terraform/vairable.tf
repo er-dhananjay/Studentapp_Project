@@ -2,7 +2,7 @@ variable "studentapp_instance_type" {
     default = "t3.micro"
 }
 variable "studentapp_ami" {
-    default = "ami-0d176f79571d18a8f"
+    default = "ami-02b8269d5e85954ef"
 }
 variable "studentapp_key_name" {
     default = "dk"
