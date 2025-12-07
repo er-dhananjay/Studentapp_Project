@@ -5,7 +5,7 @@ variable "studentapp_ami" {
     default = "ami-02b8269d5e85954ef"
 }
 variable "studentapp_key_name" {
-    default = "dk"
+    default = "studentapp-key"
 }
 variable "studentapp_instance_vpc_security_group_ids" {
     default = "sg-0f2758b7b37e072cf"
