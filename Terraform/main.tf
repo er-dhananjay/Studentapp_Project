@@ -5,19 +5,7 @@ resource "aws_instance" "studentapp" {
   vpc_security_group_ids      = [var.studentapp_instance_vpc_security_group_ids]
   disable_api_termination     = var.studentapp_disable_api_termination
 
-resource "aws_db_instance" "student_db" {
-  identifier              = "studentapp"
-  db_name                 = var.studentapp_db_db_name
-  username                = var.studentapp_db_username
-  password                = var.studentapp_db_password
-  instance_class          = var.studentapp_db_instance_class
-  allocated_storage       = var.studentapp_db_allocated_storage
-  engine                  = "MariaDB"
-  engine_version          = "11.4.8"
-  skip_final_snapshot     = true
-  vpc_security_group_ids  = [var.studentapp_instance_vpc_security_group_ids]
-}
-
+  depends_on = [aws_db_instance.student_db]
 
   user_data = <<-EOT
 #!/bin/bash
@@ -31,13 +19,13 @@ sh dockerinstall.sh
 
 docker compose up -d
 
-# Wait for DB to be ready
-until mysql -h ${var.studentapp_db_endpoint} -u ${var.studentapp_db_username} -p"${var.studentapp_db_password}" -e "select 1;" >/dev/null 2>&1; do
+# Wait for DB
+until mysql -h ${aws_db_instance.student_db.address} -u ${var.studentapp_db_username} -p"${var.studentapp_db_password}" -e "select 1;" >/dev/null 2>&1; do
   echo "Waiting for RDS..."
   sleep 10
 done
 
-# Run SQL Commands
+# Init database + table
 mysql -h ${aws_db_instance.student_db.address} \
      -u ${var.studentapp_db_username} \
      -p"${var.studentapp_db_password}" <<EOF
@@ -56,5 +44,21 @@ CREATE TABLE IF NOT EXISTS students(
 SHOW TABLES;
 EOF
 EOT
+}  # <-- Closed correctly!
+
+resource "aws_db_instance" "student_db" {
+  identifier              = "studentapp"
+  db_name                 = var.studentapp_db_db_name
+  username                = var.studentapp_db_username
+  password                = var.studentapp_db_password
+  instance_class          = var.studentapp_db_instance_class
+  allocated_storage       = var.studentapp_db_allocated_storage
+  engine                  = "MariaDB"
+  engine_version          = "11.4.8"
+  skip_final_snapshot     = true
+  vpc_security_group_ids  = [var.studentapp_instance_vpc_security_group_ids]
 }
 
+output "studentapp_publicip" {
+  value = aws_instance.studentapp.public_ip
+}
