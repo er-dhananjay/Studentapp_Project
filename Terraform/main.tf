@@ -15,7 +15,8 @@ resource "aws_instance" "studentapp" {
     sh dockerinstall.sh
     
     docker compose up -d
-    mysql -h ${aws_db_instance.studentapp_db.address} -u admin -p${var.studentapp_db_password}
+    mysql -h ${aws_db_instance.studentapp_db.address} -u admin -p
+    ${var.studentapp_db_password}
     
     create database  studentapp;
     use studentapp;
