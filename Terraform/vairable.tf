@@ -13,3 +13,18 @@ variable "studentapp_instance_vpc_security_group_ids" {
 variable "studentapp_disable_api_termination" {
     default = false
 }
+variable "studentapp_db_username" {
+    default = "admin"
+}
+variable "studentapp_db_password" {
+    default = "12345678"
+}
+variable "studentapp_db_allocated_storage" {
+    default = "20"
+}
+variable "studentapp_db_db_name" {
+    default = "studentapp"
+}
+variable "studentapp_db_instance_class" {
+    default = "db.t3.micro"
+}

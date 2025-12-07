@@ -18,6 +18,19 @@ resource "aws_instance" "studentapp" {
   EOT
 }
 
+resource "aws_db_instance" "student_db" {
+    identifier = "studentapp"
+    db_name = var.studentapp_db_db_name
+    username = var.studentapp_db_username
+    password = var.studentapp_db_password
+    instance_class = var.studentapp_db_instance_class 
+    allocated_storage = var.studentapp_db_allocated_storage
+    engine = "MariaDB"
+    engine = "MariaDB 11.4.8"
+}
+
 output "studentapp_publicip" {
   value = aws_instance.studentapp.public_ip
 }
+
+
