@@ -45,7 +45,7 @@ resource "aws_security_group" "studentapp_db_sg" {
 }
 
 ############################################
-# RDS MARIADB
+# RDS MARIADB (Public Access)
 ############################################
 resource "aws_db_instance" "studentapp_db" {
   identifier             = "studentapp-db"
@@ -53,17 +53,18 @@ resource "aws_db_instance" "studentapp_db" {
   engine                 = "mariadb"
   engine_version         = "11.4.8"
   instance_class         = var.studentapp_db_instance_class
-  name                   = var.studentapp_db_db_name
   username               = var.studentapp_db_username
   password               = var.studentapp_db_password
   port                   = 3306
   publicly_accessible    = true
   skip_final_snapshot    = true
   vpc_security_group_ids = [aws_security_group.studentapp_db_sg.id]
+
+  depends_on = [aws_security_group.studentapp_db_sg]
 }
 
 ############################################
-# EC2 INSTANCE
+# EC2 INSTANCE WITH USER_DATA
 ############################################
 resource "aws_instance" "studentapp" {
   ami                    = var.studentapp_ami
@@ -74,18 +75,26 @@ resource "aws_instance" "studentapp" {
   user_data = <<-EOF
   #!/bin/bash
   apt update -y
-  apt install docker.io -y
+  apt install docker.io mysql-client -y
   systemctl start docker
   systemctl enable docker
+
+  # Wait for DB to be ready
+  sleep 60
   
+  # Create database if not exists
+  mysql -h ${aws_db_instance.studentapp_db.address} -u ${var.studentapp_db_username} -p${var.studentapp_db_password} -e "CREATE DATABASE IF NOT EXISTS studentapp;"
+
+  # Start StudentApp Docker container
   docker run -d --name studentapp \
     -p 80:8080 \
     -e DB_HOST="${aws_db_instance.studentapp_db.address}" \
     -e DB_PORT="3306" \
     -e DB_USER="${var.studentapp_db_username}" \
     -e DB_PASS="${var.studentapp_db_password}" \
-    -e DB_NAME="${var.studentapp_db_db_name}" \
+    -e DB_NAME="studentapp" \
     studentapp:latest
-  
   EOF
+
+  depends_on = [aws_db_instance.studentapp_db]
 }
