@@ -20,7 +20,7 @@ variable "studentapp_db_password" {
     default = "12345678"
 }
 variable "studentapp_db_allocated_storage" {
-    default = "20"
+    default = 20
 }
 variable "studentapp_db_db_name" {
     default = "studentapp"
